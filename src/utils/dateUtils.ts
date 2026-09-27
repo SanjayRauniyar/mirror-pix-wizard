@@ -23,7 +23,7 @@ export function monthIndex(month: string): number {
 }
 
 export function monthName(index: number): string {
-  return MONTHS[((index % 12) + 12) % 12];
+  return MONTHS[((index % 12) + 12) % 12] as string;
 }
 
 /** Sortable key, e.g. 2026-09 */
@@ -48,11 +48,11 @@ export function parseStartMonth(raw?: string): string | null {
   const value = raw.trim();
   if (!value) return null;
   const iso = value.match(/^(\d{4})[-/](\d{1,2})/);
-  if (iso) return `${iso[1]}-${String(Number(iso[2])).padStart(2, "0")}`;
+  if (iso) return `${iso[1]!}-${String(Number(iso[2]!)).padStart(2, "0")}`;
   const withYear = value.match(/^([A-Za-z]+)[\s-]*(\d{4})$/);
   if (withYear) {
-    const idx = monthIndex(withYear[1]);
-    if (idx >= 0) return `${withYear[2]}-${String(idx + 1).padStart(2, "0")}`;
+    const idx = monthIndex(withYear[1]!);
+    if (idx >= 0) return `${withYear[2]!}-${String(idx + 1).padStart(2, "0")}`;
   }
   return null;
 }
