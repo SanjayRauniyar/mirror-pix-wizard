@@ -3,10 +3,10 @@ export type OccupancyStatus = "OCCUPIED" | "NOT_OCCUPIED";
 export interface Flat {
   flatNo: string;
   ownerName: string;
-  phone?: string;
+  phone?: string | undefined;
   occupancyStatus: OccupancyStatus;
   /** ISO-ish "YYYY-MM" when maintenance begins, if in the future */
-  maintenanceStartMonth?: string;
+  maintenanceStartMonth?: string | undefined;
   monthlyMaintenance: number;
   active: boolean;
 }
@@ -19,8 +19,8 @@ export interface Payment {
   amount: number;
   paymentDate: string;
   status: string;
-  paymentMode?: string;
-  remarks?: string;
+  paymentMode?: string | undefined;
+  remarks?: string | undefined;
 }
 
 export interface Expense {
@@ -31,7 +31,7 @@ export interface Expense {
   description: string;
   amount: number;
   status: string;
-  remarks?: string;
+  remarks?: string | undefined;
 }
 
 export interface Balance {
@@ -43,11 +43,11 @@ export interface Balance {
 export interface MaintenanceActivity {
   activityId: string;
   activityName: string;
-  activityType?: string;
+  activityType?: string | undefined;
   scheduledDate: string;
-  completedDate?: string;
+  completedDate?: string | undefined;
   status: string;
-  remarks?: string;
+  remarks?: string | undefined;
 }
 
 export interface DashboardData {
@@ -66,10 +66,10 @@ export interface FlatRow {
   flat: Flat;
   status: PaymentStatus;
   /** Month name maintenance starts, for STARTS_LATER */
-  startsMonthLabel?: string;
+  startsMonthLabel?: string | undefined;
   amountPaid: number;
-  paymentDate?: string;
-  paymentMode?: string;
+  paymentDate?: string | undefined;
+  paymentMode?: string | undefined;
   expectedAmount: number;
 }
 
