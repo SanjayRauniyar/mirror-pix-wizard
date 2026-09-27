@@ -26,7 +26,7 @@ export function DashboardHeader({
   onMonthChange: (month: string) => void;
   onRefresh: () => void;
   refreshing: boolean;
-  lastUpdated?: string;
+  lastUpdated?: string | undefined;
 }) {
   return (
     <header className="border-b border-border bg-card">

@@ -21,8 +21,8 @@ export function StatusBadge({
   className,
 }: {
   status: PaymentStatus;
-  startsMonthLabel?: string;
-  className?: string;
+  startsMonthLabel?: string | undefined;
+  className?: string | undefined;
 }) {
   const label =
     status === "PAID"
