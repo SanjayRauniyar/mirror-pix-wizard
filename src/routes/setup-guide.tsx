@@ -1,7 +1,6 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { ArrowLeft, FileSpreadsheet } from "lucide-react";
 import { Card } from "@/components/ui/card";
-import { CopyButton } from "@/components/dashboard/CopyButton";
 import { SHEET_SPECS, SPREADSHEET_NAME } from "@/services/sheetSchema";
 
 export const Route = createFileRoute("/setup-guide")({
@@ -38,14 +37,7 @@ function SetupGuide() {
 
         {SHEET_SPECS.map((spec) => (
           <Card key={spec.key} className="gap-3 p-5 shadow-card">
-            <div className="flex flex-wrap items-center justify-between gap-2">
-              <h2 className="text-lg font-semibold">Tab: “{spec.tab}”</h2>
-              <div className="flex gap-2">
-                <CopyButton label="Copy headers" text={spec.columns.map((c) => c.name).join("\t")} />
-                <CopyButton label="Copy headers + examples" text={[spec.columns.map((c) => c.name), ...spec.exampleRows].map((r) => r.join("\t")).join("\n")} />
-              </div>
-            </div>
-            <p className="text-xs text-muted-foreground">Click a copy button, then click cell A1 of the “{spec.tab}” tab and paste — each value lands in its own column.</p>
+            <h2 className="text-lg font-semibold">Tab: “{spec.tab}”</h2>
             <p className="text-sm text-muted-foreground">{spec.intro}</p>
             <div className="overflow-x-auto">
               <table className="w-full text-sm">

@@ -157,70 +157,17 @@ export async function loadDashboardData(): Promise<DashboardData> {
   }
   const defaultAmount = toNumber(settings["maintenance_amount"] ?? "");
 
-  const mappedPayments = clean(payments, mapPayment);
-  const mappedExpenses = clean(expenses, mapExpense);
-  const mappedBalances = clean(balances, mapBalance);
   return {
     flats: clean(flats, mapFlat)
       .filter((f) => f.active)
       .map((f) => (f.monthlyMaintenance ? f : { ...f, monthlyMaintenance: defaultAmount })),
-    payments: mappedPayments,
-    expenses: mappedExpenses,
-    balances: mappedBalances,
+    payments: clean(payments, mapPayment),
+    expenses: clean(expenses, mapExpense),
+    balances: clean(balances, mapBalance),
     activities: clean(activities, mapActivity),
     settings,
-    issues: [
-      ...checkSheets({ flats, payments, expenses, balances, activities, settings: settingsRows }),
-      ...balanceMismatches(mappedBalances, mappedPayments, mappedExpenses),
-    ],
+    issues: checkSheets({ flats, payments, expenses, balances, activities, settings: settingsRows }),
     source: "sheetdb",
     fetchedAt: new Date().toISOString(),
   };
-}
-
-/** Append one row to a tab of the connected Google Sheet. */
-export async function appendRow(sheet: string, row: Record<string, string | number>): Promise<void> {
-  if (!BASE_URL) throw new Error("The Google Sheet is not connected, so nothing can be saved.");
-  const res = await fetch(`${BASE_URL}?sheet=${encodeURIComponent(sheet)}`, {
-    method: "POST",
-    headers: { "Content-Type": "application/json", Accept: "application/json" },
-    body: JSON.stringify({ data: [row] }),
-  });
-  if (!res.ok) throw new Error(`Saving to the "${sheet}" tab failed (${res.status}): ${await res.text()}`);
-}
-
-/** Next id like P007 based on existing ids. */
-export function nextId(prefix: string, ids: string[]): string {
-  const max = ids.reduce((m, id) => {
-    const n = Number(id.replace(/\D/g, ""));
-    return Number.isFinite(n) && n > m ? n : m;
-  }, 0);
-  return `${prefix}${String(max + 1).padStart(3, "0")}`;
-}
-
-const MONTH_LIST = ["january","february","march","april","may","june","july","august","september","october","november","december"];
-
-/** Flags opening balances that don't equal last month's opening + collections − expenses. */
-function balanceMismatches(balances: Balance[], payments: Payment[], expenses: Expense[]) {
-  const key = (y: number, m: string) => y * 12 + MONTH_LIST.indexOf(m.toLowerCase());
-  const byKey = new Map(balances.map((b) => [key(b.year, b.month), b]));
-  const issues: { tab: string; row?: number; column?: string; message: string }[] = [];
-  balances.forEach((b, i) => {
-    const k = key(b.year, b.month);
-    const prev = byKey.get(k - 1);
-    if (!prev) return;
-    const same = (y: number, m: string) => key(y, m) === k - 1;
-    const inflow = payments.filter((p) => p.status === "PAID" && same(p.year, p.month)).reduce((s, p) => s + p.amount, 0);
-    const outflow = expenses.filter((e) => same(e.year, e.month)).reduce((s, e) => s + e.amount, 0);
-    const expected = prev.openingBalance + inflow - outflow;
-    if (Math.abs(expected - b.openingBalance) > 0.5) {
-      issues.push({
-        tab: "Balances",
-        row: i + 2,
-        column: "opening_balance",
-        message: `${b.month} ${b.year} opening balance is ${b.openingBalance}, but last month's closing works out to ${expected}.`,
-      });
-    }
-  });
-  return issues;
 }
