@@ -8,6 +8,7 @@ import type {
 } from "@/types/dashboard";
 import { toNumber } from "@/utils/currency";
 import { DEMO_DATA } from "./demoData";
+import { checkSheets } from "./dataChecks";
 
 type Row = Record<string, unknown>;
 
@@ -135,23 +136,37 @@ function clean<T>(rows: Row[], mapper: (row: Row, i: number) => T | null): T[] {
 
 export async function loadDashboardData(): Promise<DashboardData> {
   if (!BASE_URL) {
-    return { ...DEMO_DATA, fetchedAt: new Date().toISOString() };
+    return { ...DEMO_DATA, fetchedAt: new Date().toISOString(), issues: [] };
   }
 
-  const [flats, payments, expenses, balances, activities] = await Promise.all([
+  const optional = (s: string) => fetchSheet(s).catch(() => [] as Row[]);
+  const [flats, payments, expenses, balances, activitiesNew, settingsRows] = await Promise.all([
     fetchSheet(SHEETS.flats),
     fetchSheet(SHEETS.payments),
     fetchSheet(SHEETS.expenses),
-    fetchSheet(SHEETS.balances).catch(() => [] as Row[]),
-    fetchSheet(SHEETS.activities).catch(() => [] as Row[]),
+    optional(SHEETS.balances),
+    optional("Maintenance Activities"),
+    optional("Settings"),
   ]);
+  const activities = activitiesNew.length ? activitiesNew : await optional(SHEETS.activities);
+
+  const settings: Record<string, string> = {};
+  for (const r of settingsRows) {
+    const k = pick(r, "setting");
+    if (k) settings[k.toLowerCase()] = pick(r, "value");
+  }
+  const defaultAmount = toNumber(settings["maintenance_amount"] ?? "");
 
   return {
-    flats: clean(flats, mapFlat).filter((f) => f.active),
+    flats: clean(flats, mapFlat)
+      .filter((f) => f.active)
+      .map((f) => (f.monthlyMaintenance ? f : { ...f, monthlyMaintenance: defaultAmount })),
     payments: clean(payments, mapPayment),
     expenses: clean(expenses, mapExpense),
     balances: clean(balances, mapBalance),
     activities: clean(activities, mapActivity),
+    settings,
+    issues: checkSheets({ flats, payments, expenses, balances, activities, settings: settingsRows }),
     source: "sheetdb",
     fetchedAt: new Date().toISOString(),
   };
