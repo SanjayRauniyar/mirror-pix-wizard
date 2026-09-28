@@ -58,6 +58,15 @@ export interface DashboardData {
   activities: MaintenanceActivity[];
   source: "sheetdb" | "demo";
   fetchedAt: string;
+  settings?: Record<string, string> | undefined;
+  issues?: DataIssue[] | undefined;
+}
+
+export interface DataIssue {
+  tab: string;
+  row?: number | undefined;
+  column?: string | undefined;
+  message: string;
 }
 
 export type PaymentStatus = "PAID" | "PENDING" | "NOT_OCCUPIED" | "STARTS_LATER";

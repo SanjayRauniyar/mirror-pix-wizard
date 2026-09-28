@@ -1,4 +1,5 @@
 import { Droplets, RefreshCw } from "lucide-react";
+import { Link } from "@tanstack/react-router";
 import { Button } from "@/components/ui/button";
 import {
   Select,
@@ -71,6 +72,10 @@ export function DashboardHeader({
           <Button onClick={onRefresh} disabled={refreshing} className="gap-2">
             <RefreshCw className={refreshing ? "size-4 animate-spin" : "size-4"} />
             Refresh
+          </Button>
+
+          <Button asChild variant="outline">
+            <Link to="/setup-guide">Setup guide</Link>
           </Button>
 
           <p className="w-full text-xs text-muted-foreground sm:w-auto">

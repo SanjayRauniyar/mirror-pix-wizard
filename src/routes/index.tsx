@@ -116,6 +116,24 @@ function DashboardPage() {
           </Card>
         ) : null}
 
+        {data?.issues?.length ? (
+          <Card className="gap-2 border-warning/30 bg-warning-soft p-5">
+            <p className="flex items-center gap-2 font-semibold text-warning-foreground">
+              <AlertTriangle className="size-5" />
+              {data.issues.length} thing{data.issues.length > 1 ? "s" : ""} to fix in your Google Sheet
+            </p>
+            <ul className="max-h-60 space-y-1 overflow-y-auto text-sm">
+              {data.issues.map((i, k) => (
+                <li key={k}>
+                  <b>{i.tab}</b>
+                  {i.row ? `, row ${i.row}` : ""}
+                  {i.column ? `, column ${i.column}` : ""}: {i.message}
+                </li>
+              ))}
+            </ul>
+          </Card>
+        ) : null}
+
         {query.isLoading || !view ? (
           <div className="space-y-4">
             <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
