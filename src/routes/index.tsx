@@ -9,6 +9,7 @@ import { DashboardHeader } from "@/components/dashboard/DashboardHeader";
 import { ExpensesTable } from "@/components/dashboard/ExpensesTable";
 import { FlatDetailsModal } from "@/components/dashboard/FlatDetailsModal";
 import { MaintenanceActivities } from "@/components/dashboard/MaintenanceActivities";
+import { QuickActions } from "@/components/dashboard/QuickActions";
 import { PaymentTracker } from "@/components/dashboard/PaymentTracker";
 import { SummaryCards } from "@/components/dashboard/SummaryCards";
 import { Button } from "@/components/ui/button";
@@ -146,6 +147,8 @@ function DashboardPage() {
         ) : (
           <>
             <SummaryCards totals={view.totals} month={month} previousMonth={view.previousMonth} />
+
+            <QuickActions data={data!} rows={view.rows} year={year} month={month} onSaved={() => void query.refetch()} />
 
             <PaymentTracker rows={view.rows} totals={view.totals} onSelectFlat={setSelectedRow} />
 
