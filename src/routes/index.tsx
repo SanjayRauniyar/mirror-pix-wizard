@@ -150,11 +150,7 @@ function DashboardPage() {
             <PaymentTracker rows={view.rows} totals={view.totals} onSelectFlat={setSelectedRow} />
 
             <div className="grid gap-4 lg:grid-cols-2">
-              <CollectionsCard
-                totals={view.totals}
-                month={month}
-                previousMonth={view.previousMonth}
-              />
+              <CollectionsCard totals={view.totals} month={month} />
               <ExpensesTable expenses={view.expenses} month={month} />
             </div>
 

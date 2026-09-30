@@ -24,6 +24,7 @@ type SortKey = "flat" | "date";
 const FILTERS: { key: Filter; label: string }[] = [
   { key: "ALL", label: "All" },
   { key: "PAID", label: "Paid" },
+  { key: "PARTIAL", label: "Partial" },
   { key: "PENDING", label: "Pending" },
   { key: "NOT_OCCUPIED", label: "Not Occupied" },
   { key: "STARTS_LATER", label: "Starts Later" },
@@ -49,7 +50,9 @@ export function PaymentTracker({
       if (filter !== "ALL" && row.status !== filter) return false;
       if (!q) return true;
       return (
-        row.flat.flatNo.toLowerCase().includes(q) || row.flat.ownerName.toLowerCase().includes(q)
+        row.flat.flatNo.toLowerCase().includes(q) ||
+        row.flat.ownerName.toLowerCase().includes(q) ||
+        (row.flat.phone ?? "").toLowerCase().includes(q)
       );
     });
 
@@ -57,7 +60,11 @@ export function PaymentTracker({
       if (sortKey === "flat") {
         return a.flat.flatNo.localeCompare(b.flat.flatNo, undefined, { numeric: true });
       }
-      return (a.paymentDate ?? "").localeCompare(b.paymentDate ?? "");
+      // Unpaid flats (no date) always go to the bottom, regardless of direction.
+      if (!a.paymentDate && !b.paymentDate) return 0;
+      if (!a.paymentDate) return 1;
+      if (!b.paymentDate) return -1;
+      return a.paymentDate.localeCompare(b.paymentDate);
     });
     return ascending ? sorted : sorted.reverse();
   }, [rows, filter, query, sortKey, ascending]);
@@ -83,7 +90,7 @@ export function PaymentTracker({
             <Input
               value={query}
               onChange={(e) => setQuery(e.target.value)}
-              placeholder="Search flat number or owner"
+              placeholder="Search flat, owner or phone"
               className="pl-9"
             />
           </div>
@@ -158,15 +165,18 @@ export function PaymentTracker({
                     <StatusBadge status={row.status} startsMonthLabel={row.startsMonthLabel} />
                   </TableCell>
                   <TableCell className="hidden text-muted-foreground sm:table-cell">
-                    {row.status === "PAID" ? formatDate(row.paymentDate) : "—"}
+                    {row.status === "PAID" || row.status === "PARTIAL"
+                      ? formatDate(row.paymentDate)
+                      : "—"}
                   </TableCell>
                   <TableCell
                     className={cn(
                       "text-right font-semibold tabular-nums",
                       row.status === "PAID" && "text-success",
+                      row.status === "PARTIAL" && "text-warning-foreground",
                     )}
                   >
-                    {row.status === "PAID"
+                    {row.status === "PAID" || row.status === "PARTIAL"
                       ? formatINR(row.amountPaid)
                       : row.status === "PENDING"
                         ? formatINR(0)

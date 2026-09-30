@@ -49,13 +49,16 @@ export function maintenanceApplicable(flat: Flat, period: Period): boolean {
   return periodKey(period.year, period.month) >= start;
 }
 
+/** Case-insensitive flat number comparison ("a-101" matches "A-101"). */
+const normFlatNo = (s: string) => (s || "").trim().toUpperCase();
+
 export function buildFlatRows(data: DashboardData, period: Period): FlatRow[] {
   const monthPayments = paymentsFor(data.payments, period);
 
   return [...data.flats]
     .sort((a, b) => a.flatNo.localeCompare(b.flatNo, undefined, { numeric: true }))
     .map((flat) => {
-      const flatPayments = monthPayments.filter((p) => p.flatNo === flat.flatNo);
+      const flatPayments = monthPayments.filter((p) => normFlatNo(p.flatNo) === normFlatNo(flat.flatNo));
       const amountPaid = flatPayments.reduce((sum, p) => sum + p.amount, 0);
       const latest = flatPayments[flatPayments.length - 1];
       const applicable = maintenanceApplicable(flat, period);
@@ -68,8 +71,10 @@ export function buildFlatRows(data: DashboardData, period: Period): FlatRow[] {
         status = "STARTS_LATER";
         const start = parseStartMonth(flat.maintenanceStartMonth);
         startsMonthLabel = start ? monthName(Number(start.split("-")[1]) - 1) : undefined;
-      } else if (flatPayments.length > 0) {
+      } else if (amountPaid >= flat.monthlyMaintenance && flatPayments.length > 0) {
         status = "PAID";
+      } else if (amountPaid > 0) {
+        status = "PARTIAL";
       } else {
         status = "PENDING";
       }
@@ -107,17 +112,24 @@ export function computeTotals(data: DashboardData, period: Period, rows: FlatRow
   const expenses = expensesFor(data.expenses, period).reduce((s, e) => s + e.amount, 0);
   const expected = rows.reduce((s, r) => s + r.expectedAmount, 0);
   const openingBalance = resolveOpeningBalance(data, period);
+  // Sum each flat's own shortfall so one flat's advance can't mask another's dues.
+  const pendingAmount = rows.reduce((sum, r) => {
+    if (r.status === "NOT_OCCUPIED" || r.status === "STARTS_LATER") return sum;
+    return sum + Math.max(r.expectedAmount - r.amountPaid, 0);
+  }, 0);
 
   return {
     totalFlats: rows.length,
     paidCount: rows.filter((r) => r.status === "PAID").length,
-    pendingCount: rows.filter((r) => r.status === "PENDING").length,
+    pendingCount: rows.filter((r) => r.status === "PENDING" || r.status === "PARTIAL").length,
     notOccupiedCount: rows.filter((r) => r.status === "NOT_OCCUPIED").length,
     startsLaterCount: rows.filter((r) => r.status === "STARTS_LATER").length,
-    applicableCount: rows.filter((r) => r.status === "PAID" || r.status === "PENDING").length,
+    applicableCount: rows.filter(
+      (r) => r.status === "PAID" || r.status === "PENDING" || r.status === "PARTIAL",
+    ).length,
     collection,
     expected,
-    pendingAmount: Math.max(expected - collection, 0),
+    pendingAmount,
     expenses,
     openingBalance,
     totalFunds: openingBalance + collection,

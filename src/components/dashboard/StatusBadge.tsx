@@ -3,6 +3,7 @@ import type { PaymentStatus } from "@/types/dashboard";
 
 const STYLES: Record<PaymentStatus, string> = {
   PAID: "bg-success-soft text-success border-success/20",
+  PARTIAL: "bg-warning-soft text-warning-foreground border-warning/30",
   PENDING: "bg-danger-soft text-danger border-danger/20",
   NOT_OCCUPIED: "bg-neutral-soft text-muted-foreground border-border",
   STARTS_LATER: "bg-warning-soft text-warning-foreground border-warning/30",
@@ -10,6 +11,7 @@ const STYLES: Record<PaymentStatus, string> = {
 
 const DOTS: Record<PaymentStatus, string> = {
   PAID: "bg-success",
+  PARTIAL: "bg-warning",
   PENDING: "bg-danger",
   NOT_OCCUPIED: "bg-muted-foreground/50",
   STARTS_LATER: "bg-warning",
@@ -27,13 +29,15 @@ export function StatusBadge({
   const label =
     status === "PAID"
       ? "Paid"
-      : status === "PENDING"
-        ? "Pending"
-        : status === "NOT_OCCUPIED"
-          ? "Not occupied"
-          : startsMonthLabel
-            ? `Starts ${startsMonthLabel}`
-            : "Starts later";
+      : status === "PARTIAL"
+        ? "Partial"
+        : status === "PENDING"
+          ? "Pending"
+          : status === "NOT_OCCUPIED"
+            ? "Not occupied"
+            : startsMonthLabel
+              ? `Starts ${startsMonthLabel}`
+              : "Starts later";
 
   return (
     <span
