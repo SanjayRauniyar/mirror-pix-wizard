@@ -74,7 +74,7 @@ export function DashboardHeader({
             Refresh
           </Button>
 
-          <Button asChild variant="outline">
+          <Button asChild variant="outline" className="hidden">
             <Link to="/setup-guide">Setup guide</Link>
           </Button>
 
