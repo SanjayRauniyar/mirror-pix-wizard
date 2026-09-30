@@ -6,11 +6,9 @@ import { formatINR } from "@/utils/currency";
 export function CollectionsCard({
   totals,
   month,
-  previousMonth,
 }: {
   totals: Totals;
   month: string;
-  previousMonth: string;
 }) {
   return (
     <Card className="gap-0 p-5 shadow-card">
@@ -19,7 +17,7 @@ export function CollectionsCard({
         Collections
       </h2>
       <dl className="mt-4 space-y-3">
-        <Row label={`${previousMonth} Opening Balance`} value={formatINR(totals.openingBalance)} />
+        <Row label={`${month} Opening Balance`} value={formatINR(totals.openingBalance)} />
         <Row label={`${month} Collection`} value={formatINR(totals.collection)} />
         <Row label="Expected Collection" value={formatINR(totals.expected)} muted />
         <div className="flex items-center justify-between border-t border-border pt-3">

@@ -69,7 +69,7 @@ export interface DataIssue {
   message: string;
 }
 
-export type PaymentStatus = "PAID" | "PENDING" | "NOT_OCCUPIED" | "STARTS_LATER";
+export type PaymentStatus = "PAID" | "PARTIAL" | "PENDING" | "NOT_OCCUPIED" | "STARTS_LATER";
 
 export interface FlatRow {
   flat: Flat;
