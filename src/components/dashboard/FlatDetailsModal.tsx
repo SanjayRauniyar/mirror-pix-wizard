@@ -59,7 +59,7 @@ export function FlatDetailsModal({
             </div>
             <div className="mt-3 grid grid-cols-3 gap-3">
               <Detail label="Amount" value={formatINR(row.amountPaid)} />
-              <Detail label="Paid on" value={row.status === "PAID" ? formatDate(row.paymentDate) : "—"} />
+              <Detail label="Paid on" value={row.status === "PAID" || row.status === "PARTIAL" ? formatDate(row.paymentDate) : "—"} />
               <Detail label="Outstanding" value={formatINR(outstanding)} />
             </div>
           </div>
